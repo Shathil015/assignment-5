@@ -1,97 +1,79 @@
-// --- Utility function to safely get element text as number ---
-function getNumber(el, defaultValue = 0) {
-  const num = parseInt(el?.innerText);
-  return isNaN(num) ? defaultValue : num;
-}
+// --- Utility: safely get integer from element ---
+const getCount = (el, defaultValue = 0) => {
+  const val = parseInt(el?.innerText);
+  return isNaN(val) ? defaultValue : val;
+};
 
-// --- Heart Click Functionality ---
-function setupHeartButtons(countEl, buttonSelector) {
-  document.querySelectorAll(buttonSelector).forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const current = getNumber(countEl, 0);
-      countEl.innerText = current + 1;
+// --- Heart Button Functionality ---
+const heartCountEl = document.getElementById("heart-count");
+document.querySelectorAll(".btn-heart-click").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const current = getCount(heartCountEl);
+    heartCountEl.innerText = current + 1;
 
-      const icon = btn.querySelector("i");
-      if (icon?.classList.contains("fa-regular")) {
-        icon.classList.replace("fa-regular", "fa-solid");
-      }
-    });
+    const icon = btn.querySelector("i");
+    if (icon?.classList.contains("fa-regular")) {
+      icon.classList.replace("fa-regular", "fa-solid");
+    }
   });
-}
+});
 
 // --- Copy Button Functionality ---
-function setupCopyButtons(countEl, buttonSelector) {
-  document.querySelectorAll(buttonSelector).forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
+const copyCountEl = document.getElementById("copy-count");
+document.querySelectorAll(".btn-copy-click").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const card = btn.closest(".card-body");
+    const title = card?.querySelector(".card-title")?.innerText || "No Title";
+    const hotline = card?.querySelector(".hotline-number")?.innerText || "";
 
-      const card = btn.closest(".card-body");
-      const title = card?.querySelector(".card-title")?.innerText || "No Title";
-      const hotline = card?.querySelector(".hotline-number")?.innerText || "";
+    if (hotline) {
+      navigator.clipboard.writeText(hotline);
+      alert(`${title}\n${hotline}`);
+    }
 
-      if (hotline) {
-        navigator.clipboard.writeText(hotline);
-        alert(`${title}\n${hotline}`);
-      }
-
-      const current = getNumber(countEl, 0);
-      countEl.innerText = current + 1;
-    });
+    const current = getCount(copyCountEl);
+    copyCountEl.innerText = current + 1;
   });
-}
+});
 
 // --- Call Button Functionality ---
-function setupCallButtons(coinEl, buttonSelector, historyEl) {
-  document.querySelectorAll(buttonSelector).forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
+const coinCountEl = document.getElementById("coin-count");
+const callHistoryListEl = document.getElementById("history-list");
 
-      const card = btn.closest(".card-body");
-      const title = card?.querySelector(".card-title")?.innerText || "No Title";
-      const hotline = card?.querySelector(".hotline-number")?.innerText || "";
+document.querySelectorAll(".btn-call-click").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
 
-      let coins = getNumber(coinEl, 100);
-      if (coins < 20) {
-        alert("You need at least 20 coins to make a call.");
-        return;
-      }
+    const card = btn.closest(".card-body");
+    const title = card?.querySelector(".card-title")?.innerText || "No Title";
+    const hotline = card?.querySelector(".hotline-number")?.innerText || "";
 
-      alert(`Calling...\n${title}\n${hotline}`);
-      coinEl.innerText = coins - 20;
+    let coins = getCount(coinCountEl, 100);
+    if (coins < 20) {
+      alert("You need at least 20 coins to make a call.");
+      return;
+    }
 
-      const time = new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      });
+    alert(`Calling...\n${title}\n${hotline}`);
+    coinCountEl.innerText = coins - 20;
 
-      const li = document.createElement("li");
-      li.className = "p-2 bg-gray-100 rounded";
-      li.innerText = `${title}\n${hotline}\nCalled at ${time}`;
-      historyEl.prepend(li);
+    const time = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
     });
+
+    const li = document.createElement("li");
+    li.className = "p-2 bg-gray-100 rounded";
+    li.innerText = `${title}\n${hotline}\nCalled at ${time}`;
+    callHistoryListEl.prepend(li);
   });
-}
+});
 
-// --- Clear History Functionality ---
-function setupClearHistory(buttonEl, historyEl) {
-  buttonEl.addEventListener("click", () => {
-    historyEl.innerHTML = "";
-  });
-}
-
-// --- Initialize All ---
-document.addEventListener("DOMContentLoaded", () => {
-  const heartCountEl = document.getElementById("heart-count");
-  const copyCountEl = document.getElementById("copy-count");
-  const coinCountEl = document.getElementById("coin-count");
-  const historyEl = document.getElementById("history-list");
-  const clearHistoryBtn = document.getElementById("clear-history-btn");
-
-  setupHeartButtons(heartCountEl, ".btn-heart-click");
-  setupCopyButtons(copyCountEl, ".btn-copy-click");
-  setupCallButtons(coinCountEl, ".btn-call-click", historyEl);
-  setupClearHistory(clearHistoryBtn, historyEl);
+// --- Clear Call History ---
+document.getElementById("clear-history-btn").addEventListener("click", () => {
+  callHistoryListEl.innerHTML = "";
 });
